@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="community-page">
+    <h1 class="text-center my-5">Join Our Community</h1>
+    <p class="text-center lead">
+        Be part of a growing network of people who share, rent, and resell items to make the world more sustainable!
+    </p>
+
+    <div class="community-benefits text-center my-5">
+        <h2>Why Join?</h2>
+        <ul class="list-unstyled mt-4">
+            <li>🤝 Meet like-minded individuals</li>
+            <li>🌍 Promote sustainability</li>
+            <li>📈 Expand your opportunities to rent, resell, and exchange</li>
+            <li>💬 Participate in community discussions</li>
+        </ul>
+    </div>
+
+    <div class="join-form-container text-center my-5">
+        <h2>Get Started Today!</h2>
+        <form action="/join" method="POST" class="join-form mt-4">
+            <div class="form-group">
+                <input type="text" name="name" class="form-control my-2" placeholder="Your Name" required>
+            </div>
+            <div class="form-group">
+                <input type="email" name="email" class="form-control my-2" placeholder="Your Email" required>
+            </div>
+            <div class="form-group">
+                <textarea name="message" class="form-control my-2" rows="4" placeholder="Tell us why you'd like to join"></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Join Now</button>
+        </form>
+    </div>
+
+    <div class="community-testimonials my-5">
+        <h2 class="text-center">What Members Say</h2>
+        <div class="testimonial-list text-center mt-4">
+            <blockquote>
+                <p>"Joining the community has completely changed how I interact with others. It's been an amazing journey!"</p>
+                <footer>— Alex D.</footer>
+            </blockquote>
+            <blockquote class="mt-4">
+                <p>"I've saved so much money and met great people by being part of this group."</p>
+                <footer>— Sarah W.</footer>
+            </blockquote>
+        </div>
+    </div>
+</div>
+{% endblock %}

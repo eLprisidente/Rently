@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Conversation with {{ other_user.username }} - Rently{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Conversation with {{ other_user.username }}</h2>
+
+    <div class="card mb-3">
+        <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+            {% if messages %}
+                {% for msg in messages %}
+                <div class="mb-2">
+                    {% if msg.sender_id == current_user.id %}
+                        <div class="text-end">
+                            <strong>You:</strong> {{ msg.content }}
+                            <br>
+                            <small class="text-muted">{{ msg.created_at }}</small>
+                        </div>
+                    {% else %}
+                        <div>
+                            <strong>{{ other_user.username }}:</strong> {{ msg.content }}
+                            <br>
+                            <small class="text-muted">{{ msg.created_at }}</small>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            {% else %}
+                <p>No messages yet</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Form for sending a new message -->
+    <form method="POST" action="{{ url_for('messages_conversation', user_id=other_user.id) }}">
+        <div class="mb-3">
+            <label for="content" class="form-label">New message</label>
+            <textarea class="form-control" id="content" name="content" rows="2" required></textarea>
+        </div>
+        <button type="submit" style="min-width: 220px; white-space: nowrap;" class="btn btn-primary">Send</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Explore - Rently{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h1>Explore Items</h1>
+
+    <!-- Search Form -->
+    <form method="GET" action="{{ url_for('explore') }}" class="mb-4">
+        <div class="row">
+            <div class="col">
+                <input type="text" name="search" class="form-control" placeholder="Search by title" value="{{ request.args.get('search', '') }}">
+            </div>
+            <div class="col">
+                <input type="number" name="max_price" class="form-control" placeholder="Max price" value="{{ request.args.get('max_price', '') }}">
+            </div>
+            <div class="col">
+                <!-- Dropdown list of categories -->
+                <select name="category" class="form-control">
+                    <option value="" disabled {% if request.args.get('category') is none %}selected{% endif %}>Filter by category</option>
+                    <option value="Electronics" {% if request.args.get('category') == 'Electronics' %}selected{% endif %}>Electronics</option>
+                    <option value="Furniture" {% if request.args.get('category') == 'Furniture' %}selected{% endif %}>Furniture</option>
+                    <option value="Clothing" {% if request.args.get('category') == 'Clothing' %}selected{% endif %}>Clothing</option>
+                    <option value="" {% if request.args.get('category') is none %}selected{% endif %}>All Categories</option>
+                    <!-- Add other categories similarly -->
+                </select>
+            </div>
+            <div class="col">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </div>
+    </form>
+
+    <!-- Items display -->
+    <div class="row">
+        {% for item in items %}
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm" style="min-height: 450px;">
+                    <img src="{{ item.image_path }}" class="card-img-top" style="height: 200px; object-fit: cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ item.title }}</h5>
+                        <p class="card-text flex-grow-1">{{ item.description }}</p>
+                        <p class="card-text"><strong>Category:</strong> {{ item.category }}</p>
+
+                        <!-- Если цена == 0 или None, пишем "Для аренды", иначе выводим цену -->
+                        {% if not item.price or item.price == 0 %}
+                            <p class="card-text"><strong>Price:</strong> For Rent</p>
+                        {% else %}
+                            <p class="card-text"><strong>Price:</strong> {{ item.price }} ₽</p>
+                        {% endif %}
+
+                        <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-primary mt-auto">More Details</a>
+                    </div>
+                </div>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

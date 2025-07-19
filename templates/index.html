@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Home - Rently{% endblock %}
+
+{% block content %}
+
+<div class="split-text-container">
+    <span class="text-part left">REN</span>
+    <span class="text-part right">TLY</span>
+</div>
+
+<div class="jumbotron text-center">
+    <a class="btn btn-primary btn-lg" href="/explore" role="button">Explore Listings</a>
+    <a class="btn btn-secondary btn-lg" href="/post_item" role="button">Post an Item</a>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-4">
+        <div class="card">
+            <img src="/static/images/rent2.png" class="card-img-top" alt="Rent Items">
+            <div class="card-body">
+                <h5 class="card-title">Rent Items</h5>
+                <p class="card-text">Find items to rent near you at affordable prices</p>
+                <a href="/explore" class="btn btn-primary">Learn More</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <img src="/static/images/resell2.png" class="card-img-top" alt="Resell Items">
+            <div class="card-body">
+                <h5 class="card-title">Resell Items</h5>
+                <p class="card-text">Give your items a new life</p>
+                <a href="/post_item" class="btn btn-primary">Learn More</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <img src="/static/images/community2.png" class="card-img-top" alt="Community">
+            <div class="card-body">
+                <h5 class="card-title">Join the Community</h5>
+                <p class="card-text">Connect with like-minded people</p>
+                <a href="/community" class="btn btn-primary">Learn More</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

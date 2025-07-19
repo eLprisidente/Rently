@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block title %}Edit Profile - Rently{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="max-width: 600px; font-size: 1.2rem;">
+    <h2 class="mb-4">Edit Profile</h2>
+    <form method="POST" action="{{ url_for('edit_profile') }}">
+        <!-- Username -->
+        <div class="mb-3">
+            <label for="username" class="form-label">Username</label>
+            <input type="text" class="form-control" id="username" name="username"
+                   value="{{ current_data.username }}" required>
+        </div>
+
+        <!-- Email -->
+        <div class="mb-3">
+            <label for="email" class="form-label">Email</label>
+            <input type="email" class="form-control" id="email" name="email"
+                   value="{{ current_data.email }}" required>
+        </div>
+
+        <!-- New password -->
+        <div class="mb-3">
+            <label for="password" class="form-label">New Password (optional)</label>
+            <input type="password" class="form-control" id="password" name="password"
+                   placeholder="Leave empty to keep current password">
+        </div>
+
+        <!-- Confirm password -->
+        <div class="mb-3">
+            <label for="confirm_password" class="form-label">Confirm Password</label>
+            <input type="password" class="form-control" id="confirm_password" name="confirm_password"
+                   placeholder="Repeat the password">
+        </div>
+
+        <!-- Buttons -->
+        <div class="d-flex mt-4">
+            <button type="submit" style="min-width: 300px; white-space: nowrap;"
+                    class="btn btn-primary me-3">Save Changes</button>
+            <a href="{{ url_for('profile') }}" class="btn btn-secondary">Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

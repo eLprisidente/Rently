@@ -1,0 +1,338 @@
+{% extends "base.html" %}
+
+{% block title %}{{ item.title }} - Rently{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <!-- Left column: Carousel + Thumbnails + All Reviews -->
+        <div class="col-lg-7" style="font-size: 1.1rem;">
+            <!-- Carousel -->
+            <div id="itemCarousel" class="carousel slide position-relative" data-bs-ride="carousel">
+                <div class="carousel-inner shadow-lg rounded">
+                    <!-- Main (title) image -->
+                    <div class="carousel-item active" data-img="{{ item.image_path.replace('\\', '/').lstrip('static/') }}">
+                        <img src="{{ url_for('static', filename=item.image_path.replace('\\', '/').lstrip('static/')) }}"
+                             class="d-block w-100 rounded"
+                             style="max-height: 500px; object-fit: cover;">
+                    </div>
+                    <!-- Additional images -->
+                    {% for img in item.additional_images %}
+                    <div class="carousel-item" data-img="{{ img.replace('\\', '/').lstrip('static/') }}">
+                        <img src="{{ url_for('static', filename=img.replace('\\', '/').lstrip('static/')) }}"
+                             class="d-block w-100 rounded"
+                             style="max-height: 500px; object-fit: cover;">
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev small-carousel-btn" type="button"
+                        data-bs-target="#itemCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                </button>
+                <button class="carousel-control-next small-carousel-btn" type="button"
+                        data-bs-target="#itemCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                </button>
+            </div>
+
+            <!-- Thumbnails (including main + additional images) -->
+            <div class="row mt-4">
+                <!-- Main thumbnail -->
+                <div class="col-3 col-md-2">
+                    <img src="{{ url_for('static', filename=item.image_path.replace('\\', '/').lstrip('static/')) }}"
+                         class="img-thumbnail mini-thumb"
+                         data-img="{{ item.image_path.lstrip('static/') }}"
+                         style="cursor:pointer; max-height: 100px; object-fit: cover;"
+                         onclick="changeMainImage('{{ item.image_path.replace('\\', '/').lstrip('static/') }}'); highlightThumbnail('{{ item.image_path.replace('\\', '/').lstrip('static/') }}');">
+                </div>
+                <!-- Additional thumbnails -->
+                {% for img in item.additional_images %}
+                <div class="col-3 col-md-2">
+                    <img src="{{ url_for('static', filename=img.replace('\\', '/').lstrip('static/')) }}"
+                         class="img-thumbnail mini-thumb"
+                         data-img="{{ img.replace('\\', '/').lstrip('static/') }}"
+                         style="cursor:pointer; max-height: 100px; object-fit: cover;"
+                         onclick="changeMainImage('{{ img.replace('\\', '/').lstrip('static/') }}'); highlightThumbnail('{{ img.replace('\\', '/').lstrip('static/') }}');">
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- List of all reviews -->
+            <div class="mt-4">
+                <h4>Reviews</h4>
+                {% if comments %}
+                    <div class="list-group">
+                        {% for comment in comments %}
+                        <div class="list-group-item">
+                            <strong>{{ comment.user.username }}</strong>
+                            <small class="text-muted">{{ comment.created_at }}</small>
+                            <p class="mt-2 mb-1">{{ comment.content }}</p>
+
+                            {% if comment.rating %}
+                            <div class="text-warning">
+                                {% for i in range(comment.rating) %}
+                                    ★
+                                {% endfor %}
+                                {% for i in range(5 - comment.rating) %}
+                                    ☆
+                                {% endfor %}
+                                <span class="ms-2 text-dark">{{ comment.rating }}/5</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p>No reviews yet</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Right column: item description, SELLER rating, and review form -->
+        <div class="col-lg-5" style="font-size: 1.1rem;">
+            <div class="card shadow p-4">
+                <!-- Title + heart-square (if authenticated) -->
+                <div class="d-flex align-items-center justify-content-between">
+                    <h1 class="card-title m-0">{{ item.title }}</h1>
+
+                    {% if current_user.is_authenticated %}
+                        {% if is_favorite %}
+                            <!-- Already in favorites -->
+                            <a href="{{ url_for('remove_from_favorites', item_id=item.id) }}"
+                               class="fav-square favorite-square"
+                               title="Remove from favorites">
+                               &#10084;
+                            </a>
+                        {% else %}
+                            <!-- Not in favorites -->
+                            <a href="{{ url_for('add_to_favorites', item_id=item.id) }}"
+                               class="fav-square not-favorite-square"
+                               title="Add to favorites">
+                               &#9825;
+                            </a>
+                        {% endif %}
+                    {% endif %}
+                </div>
+
+                <!-- Если нет цены или 0, показываем "Для аренды", иначе - цену -->
+                {% if not item.price or item.price == 0 %}
+                    <h3 class="text-primary mt-3">For Rent</h3>
+                {% else %}
+                    <h3 class="text-primary mt-3">{{ item.price }} ₽</h3>
+                {% endif %}
+
+                <p><strong>Category:</strong> {{ item.category }}</p>
+                <p>{{ item.description }}</p>
+
+                <!-- "Contact the seller" button -->
+                <button class="btn btn-primary w-100"
+                        onclick="location.href='{{ url_for('messages_conversation', user_id=item.owner.id) }}'">
+                    Contact the seller
+                </button>
+                <a href="{{ url_for('explore') }}" class="btn btn-secondary w-100 mt-2">
+                    Return to list
+                </a>
+
+                <!-- Average rating of SELLER -->
+                <div class="mt-4">
+                    <p><strong>Seller's Rating</strong></p>
+                    {% if avg_rating > 0 %}
+                    <div class="text-warning" style="font-size: 1.8rem;">
+                        {% set int_part = avg_rating|int %}
+                        {% set fractional = avg_rating - int_part %}
+                        {% for i in range(int_part) %}
+                            ★
+                        {% endfor %}
+                        {% if fractional >= 0.5 %}
+                            ★
+                        {% endif %}
+                        {% for i in range(5 - int_part - (1 if fractional >= 0.5 else 0)) %}
+                            ☆
+                        {% endfor %}
+                        <span class="ms-2 text-dark">{{ avg_rating|round(1) }}/5</span>
+                    </div>
+                    {% else %}
+                    <p>No ratings yet</p>
+                    {% endif %}
+                </div>
+
+                <!-- Review form + star rating -->
+                <div class="mt-4">
+                    <p><strong>Your Review</strong></p>
+                    <form method="POST" action="{{ url_for('add_comment_route', item_id=item.id) }}">
+                        <div class="mb-3">
+                            <textarea name="comment_text"
+                                      id="comment_text"
+                                      class="form-control"
+                                      rows="2"
+                                      placeholder="Share your opinion about the item"
+                                      required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="star-rating" id="starRating">
+                                <input type="radio" id="star1" name="rating" value="1">
+                                <label for="star1" data-value="1">★</label>
+
+                                <input type="radio" id="star2" name="rating" value="2">
+                                <label for="star2" data-value="2">★</label>
+
+                                <input type="radio" id="star3" name="rating" value="3">
+                                <label for="star3" data-value="3">★</label>
+
+                                <input type="radio" id="star4" name="rating" value="4">
+                                <label for="star4" data-value="4">★</label>
+
+                                <input type="radio" id="star5" name="rating" value="5" checked>
+                                <label for="star5" data-value="5">★</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <button type="submit"
+                                    class="btn btn-primary"
+                                    style="min-width: 150px; white-space: nowrap;">
+                                Send
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .small-carousel-btn {
+        height: 40px;
+        width: 60px;
+        top: 50%;
+        transform: translateY(-50%);
+        background-color: rgba(0, 0, 0, 0.3);
+        border: none;
+        border-radius: 5px;
+    }
+    .carousel-control-prev {
+        left: 10px;
+    }
+    .carousel-control-next {
+        right: 10px;
+    }
+    .carousel-control-prev-icon,
+    .carousel-control-next-icon {
+        width: 20px;
+        height: 20px;
+    }
+    .carousel-inner {
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .mini-thumb {
+        transition: transform 0.2s, border 0.2s;
+    }
+    .active-thumb {
+        border: 2px solid gold;
+        transform: scale(1.05);
+    }
+
+    .fav-square {
+        display: inline-block;
+        width: 36px;
+        height: 36px;
+        border-radius: 4px;
+        text-align: center;
+        line-height: 36px;
+        margin-left: 10px;
+        text-decoration: none;
+        font-size: 1.3rem;
+    }
+    .not-favorite-square {
+        background-color: #eee;
+        color: #333;
+        border: 1px solid #ccc;
+    }
+    .favorite-square {
+        background-color: #dc3545;
+        color: #fff;
+        border: 1px solid #dc3545;
+    }
+
+    .star-rating {
+        display: inline-block;
+        font-size: 2rem;
+        color: #ccc;
+    }
+    .star-rating input[type='radio'] {
+        display: none;
+    }
+    .star-rating label {
+        margin-right: 5px;
+        cursor: pointer;
+        transition: transform 0.2s;
+    }
+    .star-rating label:hover,
+    .star-rating label:hover ~ label {
+        transform: scale(1.2);
+        color: gold;
+    }
+</style>
+
+<script>
+    function changeMainImage(imagePath) {
+        document.querySelector('.carousel-item.active img').src =
+            '{{ url_for('static', filename='') }}' + imagePath;
+    }
+
+    function highlightThumbnail(imgPath) {
+      let thumbs = document.querySelectorAll('.mini-thumb');
+      thumbs.forEach(t => t.classList.remove('active-thumb'));
+      let target = document.querySelector(`.mini-thumb[data-img="${imgPath}"]`);
+      if (target) {
+        target.classList.add('active-thumb');
+      }
+    }
+
+    document.getElementById('itemCarousel').addEventListener('slid.bs.carousel', function (evt) {
+      let activeItem = this.querySelector('.carousel-item.active');
+      let path = activeItem.getAttribute('data-img');
+      highlightThumbnail(path);
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      highlightThumbnail('{{ item.image_path.lstrip('static/') }}');
+    });
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const starContainer = document.getElementById('starRating');
+      if (!starContainer) return;
+
+      const labels = starContainer.querySelectorAll('label');
+      const radios = starContainer.querySelectorAll('input[type=radio]');
+
+      function highlightStars(n) {
+        labels.forEach(label => {
+          const val = parseInt(label.dataset.value);
+          label.style.color = (val <= n) ? 'gold' : '#ccc';
+        });
+      }
+
+      function resetStars() {
+        const checked = starContainer.querySelector('input[type=radio]:checked');
+        const value = checked ? parseInt(checked.value) : 0;
+        highlightStars(value);
+      }
+
+      labels.forEach(label => {
+        const val = parseInt(label.dataset.value);
+        label.addEventListener('mouseover', () => highlightStars(val));
+        label.addEventListener('mouseout', resetStars);
+        label.addEventListener('click', () => {
+          starContainer.querySelector('#star' + val).checked = true;
+          resetStars();
+        });
+      });
+
+      resetStars();
+    });
+</script>
+{% endblock %}

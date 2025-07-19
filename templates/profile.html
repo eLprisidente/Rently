@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}My Profile - Rently{% endblock %}
+
+{% block content %}
+<div class="container mt-5" style="font-size: 1.1rem;">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="mb-0">Profile {{ current_user.username }}</h1>
+        <!-- Edit Info Button -->
+        <a href="{{ url_for('edit_profile') }}">
+            <button style="min-width: 220px; white-space: nowrap;" class="btn btn-primary me-3">
+                Edit Info
+            </button>
+        </a>
+    </div>
+
+    <!-- Statistics -->
+    <div class="row mb-4">
+        <!-- Number of Items -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Number of Items</h5>
+                    <p class="display-6">{{ total_items }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- Average Rating -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Average Rating</h5>
+                    {% if average_rating > 0 %}
+                        <p class="display-6">{{ average_rating|round(1) }}/5</p>
+                    {% else %}
+                        <p class="text-muted">no ratings</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <!-- Total Reviews -->
+        <div class="col-md-4 mb-3">
+            <div class="card shadow-sm h-100">
+                <div class="card-body text-center">
+                    <h5 class="card-title">Total Reviews</h5>
+                    <p class="display-6">{{ number_of_comments }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- My Items -->
+    <h4>My Items</h4>
+    {% if items %}
+        <div class="row">
+            {% for item in items %}
+            <div class="col-md-4 mb-4">
+                <!-- position-relative для размещения кнопки в углу -->
+                <div class="card h-100 shadow-sm position-relative">
+
+                    <!-- Кнопка удаления (корзина), светло-серая (btn-light) -->
+                    <form method="POST"
+                      action="{{ url_for('delete_item', item_id=item.id) }}"
+                      onsubmit="return confirm('Are you sure you want to delete this item?');"
+                      style="position: absolute; top: 5px; right: 5px; z-index: 10;">
+                    <button type="submit"
+                            class="btn btn-light"
+                            style="font-size: 1.2rem; width: auto;"
+                            title="Delete this item">
+                        &#128465;
+                    </button>
+                    </form>
+
+                    <img src="{{ url_for('static', filename=item.image_path.replace('\\', '/').lstrip('static/')) }}"
+                         class="card-img-top"
+                         style="height: 200px; object-fit: cover;">
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ item.title }}</h5>
+                        <p class="card-text text-muted">
+                            {{ item.description|truncate(100) }}
+                        </p>
+
+                        <!-- Если цена = 0 или None, пишем "Для аренды", иначе - цена -->
+                        {% if not item.price or item.price == 0 %}
+                            <p class="card-text"><strong>Price:</strong> Для аренды</p>
+                        {% else %}
+                            <p class="card-text"><strong>Price:</strong> {{ item.price }} ₽</p>
+                        {% endif %}
+
+                        <a href="{{ url_for('item_detail', item_id=item.id) }}" class="btn btn-primary mt-auto">
+                            Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>You don't have any items yet.</p>
+    {% endif %}
+</div>
+{% endblock %}

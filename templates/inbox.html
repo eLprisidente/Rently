@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+{% block title %}Messages{% endblock %}
+{% block content %}
+<div class="container mt-5">
+    <h2>My Messages</h2>
+    {% if interlocutors %}
+        <ul class="list-group">
+            {% for user in interlocutors %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>{{ user.username }}</span>
+                <a href="{{ url_for('messages_conversation', user_id=user.id) }}"
+                   class="btn btn-sm btn-primary" style="min-width: 220px; white-space: nowrap;">
+                    Open Conversation
+                </a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>No conversations</p>
+    {% endif %}
+</div>
+{% endblock %}
